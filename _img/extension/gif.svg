@@ -1,0 +1,27 @@
+<svg id="그룹_178482" data-name="그룹 178482" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18" height="24" viewBox="0 0 18 24">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="사각형_154499" data-name="사각형 154499" width="18" height="24" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-3">
+      <rect id="사각형_154496" data-name="사각형 154496" width="5.439" height="5.357" fill="none"/>
+    </clipPath>
+  </defs>
+  <g id="그룹_178481" data-name="그룹 178481" clip-path="url(#clip-path)">
+    <g id="그룹_178480" data-name="그룹 178480">
+      <g id="그룹_178479" data-name="그룹 178479" clip-path="url(#clip-path)">
+        <path id="패스_98877" data-name="패스 98877" d="M12.046,0H.449A.446.446,0,0,0,0,.443V23.557A.446.446,0,0,0,.449,24h17.1A.446.446,0,0,0,18,23.557V5.864a.555.555,0,0,0-.166-.4L12.448.164a.572.572,0,0,0-.4-.164" fill="#00ccae"/>
+        <g id="그룹_178478" data-name="그룹 178478" transform="translate(12.282 0.275)" opacity="0.15">
+          <g id="그룹_178477" data-name="그룹 178477">
+            <g id="그룹_178476" data-name="그룹 178476" clip-path="url(#clip-path-3)">
+              <path id="패스_98878" data-name="패스 98878" d="M191.452,9.7h4.732a.194.194,0,0,0,.14-.332L191.28,4.4a.2.2,0,0,0-.337.138V9.2a.505.505,0,0,0,.509.5" transform="translate(-190.943 -4.341)"/>
+            </g>
+          </g>
+        </g>
+        <path id="패스_98879" data-name="패스 98879" d="M76.174,186.343a4.289,4.289,0,0,1-1.4.246,2.356,2.356,0,0,1-1.7-.591,2.366,2.366,0,0,1,1.826-3.976,2.846,2.846,0,0,1,1.132.206l-.142.471a2.385,2.385,0,0,0-1-.193,1.686,1.686,0,0,0-1.826,1.8,1.652,1.652,0,0,0,1.752,1.805,1.938,1.938,0,0,0,.782-.119v-1.334h-.923v-.465h1.5Z" transform="translate(-67.787 -170.491)" fill="#fff"/>
+        <rect id="사각형_154497" data-name="사각형 154497" width="0.586" height="4.474" transform="translate(9.283 11.577)" fill="#fff"/>
+        <path id="패스_98880" data-name="패스 98880" d="M169.368,182.755h2.446v.485h-1.86v1.487h1.719v.478h-1.719v2.024h-.586Z" transform="translate(-158.474 -171.177)" fill="#fff"/>
+      </g>
+    </g>
+  </g>
+</svg>

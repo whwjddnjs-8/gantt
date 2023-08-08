@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <g id="그룹_178736" data-name="그룹 178736" transform="translate(-1150 -815)">
+    <g id="그룹_275" data-name="그룹 275" transform="translate(3823.113 557.424)">
+      <line id="선_362" data-name="선 362" y2="3" transform="translate(-2661.613 263.577)" fill="none" stroke="#999" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+      <line id="선_363" data-name="선 363" y2="3" transform="translate(-2653.613 263.577)" fill="none" stroke="#999" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+      <path id="패스_583" data-name="패스 583" d="M-2651.413,282.977a3.2,3.2,0,0,0,3.2-3.2,3.2,3.2,0,0,0-3.2-3.2,3.2,3.2,0,0,0-3.2,3.2A3.2,3.2,0,0,0-2651.413,282.977Z" fill="none" stroke="#999" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+      <line id="선_364" data-name="선 364" x1="1" y1="1" transform="translate(-2648.613 282.577)" fill="none" stroke="#999" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+      <line id="선_365" data-name="선 365" x2="17" transform="translate(-2666.113 270.667)" fill="none" stroke="#999" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+      <path id="패스_584" data-name="패스 584" d="M-2656.243,283.577h-5.37c-3.5,0-5-2-5-5v-8.5c0-3,1.5-5,5-5h8c3.5,0,5,2,5,5v4.5" fill="none" stroke="#999" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+      <line id="선_366" data-name="선 366" transform="translate(-2657.613 275.277)" fill="none" stroke="#999" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+      <line id="선_367" data-name="선 367" x2="0.006" transform="translate(-2661.319 275.277)" fill="none" stroke="#999" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+      <line id="선_368" data-name="선 368" x2="0.005" transform="translate(-2661.318 278.277)" fill="none" stroke="#999" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+    </g>
+    <rect id="사각형_274" data-name="사각형 274" width="32" height="32" transform="translate(1182 847) rotate(180)" fill="none" opacity="0.2"/>
+  </g>
+</svg>

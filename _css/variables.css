@@ -1,0 +1,21 @@
+@charset "UTF-8";
+
+:root {
+  /* color */
+  --color-primary: #1A73E8;
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+  --color-background: #ffffff;
+
+  /* text-color */
+  --main-font-color: #111111;
+
+  /* box shadow */
+  --box-shadow1: 6px 3px 5px #00000008;
+
+  /* breakpoint */
+  --breakpoint-mo: 768px;
+
+  /* Font */
+  --primary-font: "Pretendard";
+}

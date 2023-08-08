@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>간트차트</title>
+  <!-- Favicon -->
+  <link rel="icon" href="/_img/common/favicon.png">
+  <!-- OpenGraph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="간트차트" />
+  <meta property="og:description" content="간트차트" />
+  <!-- jQuery CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+  <!-- swiper -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+  <!-- DateTimePicker -->
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+  <!-- Custom CSS & JS -->
+  <link rel="stylesheet" href="/_css/common.css">
+  <script src="/_js/common.js" defer></script>
+  <!-- Gantt -->
+  <link rel=stylesheet href="platform.css" type="text/css">
+  <link rel=stylesheet href="libs/jquery/dateField/jquery.dateField.css" type="text/css">
+  <link rel=stylesheet href="gantt.css" type="text/css">
+  <link rel=stylesheet href="ganttPrint.css" type="text/css" media="print">
+  <link rel=stylesheet href="libs/jquery/valueSlider/mb.slider.css" type="text/css" media="print">
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <script src="libs/jquery/jquery.livequery.1.1.1.min.js"></script>
+  <script src="libs/jquery/jquery.timers.js"></script>
+  <script src="libs/utilities.js"></script>
+  <script src="libs/forms.js"></script>
+  <script src="libs/date.js"></script>
+  <script src="libs/dialogs.js"></script>
+  <script src="libs/layout.js"></script>
+  <script src="libs/i18nJs.js"></script>
+  <script src="libs/jquery/dateField/jquery.dateField.js"></script>
+  <script src="libs/jquery/JST/jquery.JST.js"></script>
+  <script src="libs/jquery/valueSlider/jquery.mb.slider.js"></script>
+  <script type="text/javascript" src="libs/jquery/svg/jquery.svg.min.js"></script>
+  <script type="text/javascript" src="libs/jquery/svg/jquery.svgdom.1.8.js"></script>
+  <script src="ganttUtilities.js"></script>
+  <script src="ganttTask.js"></script>
+  <script src="ganttDrawerSVG.js"></script>
+  <script src="ganttZoom.js"></script>
+  <script src="ganttGridEditor.js"></script>
+  <script src="ganttMaster.js"></script>
+  <!-- NiceSelect -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/css/nice-select.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/js/jquery.nice-select.min.js"></script>
+</head>
+
+<body>
+  <div id="wrap" class="wrap-project">
+    <header>
+      <div class="header_wrap">
+        <div class="header__inner">
+          <a href="#" class="logo"></a>
+          <div class="header__right">
+            <ul class="gnb">
+              <li><a href="#">메인 페이지</a></li>
+              <li><a href="#">건축인허가 소개</a></li>
+              <li><a href="#">준공서류 샘플</a></li>
+              <li><a href="#">프로젝트 관리</a></li>
+              <li><a href="#">마이 페이지</a></li>
+              <li><a href="#">고객센터</a></li>
+            </ul>
+            <ul class="sns">
+              <li><a href="#" class="sns_kakao"></a></li>
+              <li><a href="#" class="sns_blog"></a></li>
+            </ul>
+            <a href="#" class="btn btn-md btn-login">로그인/회원가입</a>
+          </div>
+          <button type="button" class="btn_mo-menu"></button>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div class="project_container">
+        <div class="pj_lnb">
+          <div class="title"><a href="#">프로젝트 목록</a></div>
+          <ul class="lnb">
+            <li class="active"><a href="#">· 프로젝트 일정</a></li>
+            <li><a href="#">· 기초 자료</a></li>
+            <li><a href="#">· 준공 서류</a></li>
+            <li><a href="#">· 준공 도면</a></li>
+            <li><a href="#">· 건축허가조건</a></li>
+            <li><a href="#">· 프로젝트 초대</a></li>
+          </ul>
+        </div>
+        <div class="pj_contents">
+          <div class="gantt_inner">
+            <div id="workSpace"
+              style="padding:0px; overflow-y:auto; overflow-x:hidden;position:relative; height: 100%;">
+            </div>
+            <form id="gimmeBack" style="display:none;" action="../gimmeBack.jsp" method="post" target="_blank"><input type="hidden"
+                name="prj" id="gimBaPrj"></form>
+
+            <script type="text/javascript">
+              var ge;
+              $(function () {
+                var canWrite = true;
+                ge = new GanttMaster();
+                ge.set100OnClose = true;
+                ge.shrinkParent = true;
+                ge.init($("#workSpace"));
+                loadI18n();
+                delete ge.gantt.zoom;
+
+                var project = loadFromLocalStorage();
+
+                if (!project.canWrite)
+                  $(".ganttButtonBar button.requireWrite").attr("disabled", "true");
+
+                ge.loadProject(project);
+                ge.checkpoint();
+
+                initializeHistoryManagement(ge.tasks[0].id);
+              });
+
+              function getDemoProject() {
+                ret = {
+                  "tasks": [
+                    { "id": -1, "name": "건축", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "비고 없음", "code": "", "level": 0, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 20, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true },
+                    { "id": -2, "name": "폐기물처리필증", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "비고1", "code": "", "level": 1, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 10, "end": 1398203999999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true },
+                    { "id": -3, "name": "건축물관리대장", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "비고1", "code": "", "level": 2, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 2, "end": 1397167199999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false },
+                    { "id": -4, "name": "사용승인 신청서", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "비고1", "code": "", "level": 2, "status": "STATUS_WAITING", "depends": "3", "canWrite": true, "start": 1397167200000, "duration": 4, "end": 1397685599999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false },
+                    { "id": -5, "name": "구조", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "비고1", "code": "", "level": 1, "status": "STATUS_WAITING", "depends": "2:5", "canWrite": true, "start": 1398981600000, "duration": 5, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true },
+                    { "id": -6, "name": "폐기물처리필증", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "비고1", "code": "", "level": 2, "status": "STATUS_DONE", "depends": "", "canWrite": true, "start": 1398981600000, "duration": 2, "end": 1399327199999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false },
+                    { "id": -7, "name": "폐기물처리필증1", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "비고1", "code": "", "level": 2, "status": "STATUS_DONE", "depends": "6", "canWrite": true, "start": 1399327200000, "duration": 3, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false },
+                    { "id": -8, "name": "폐기물처리필증2", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "비고1", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "6", "canWrite": true, "start": 1399327200000, "duration": 2, "end": 1399499999999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false },
+                    { "id": -9, "name": "구조", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "비고 없음", "code": "", "level": 0, "status": "STATUS_WAITING", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 20, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true },
+                    { "id": -10, "name": "폐기물처리필증1", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "비고1", "code": "", "level": 1, "status": "STATUS_WAITING", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 10, "end": 1398203999999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true },
+                    { "id": -11, "name": "기계", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "비고 없음", "code": "", "level": 0, "status": "STATUS_WAITING", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 20, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true }
+                  ], "selectedRow": 2, "deletedTaskIds": [],
+                  "resources": [
+                    { "id": "tmp_1", "name": "김단군" },
+                    { "id": "tmp_2", "name": "홍길동" },
+                    { "id": "tmp_3", "name": "박동명" },
+                    { "id": "tmp_4", "name": "김유신" }
+                  ],
+                  "roles": [
+                    { "id": "tmp_1", "name": "Project Manager" },
+                    { "id": "tmp_2", "name": "Worker" },
+                    { "id": "tmp_3", "name": "Stakeholder" },
+                    { "id": "tmp_4", "name": "Customer" }
+                  ], "canWrite": true, "canDelete": true, "canWriteOnParent": true, canAdd: true
+                }
+
+                var offset = new Date().getTime() - ret.tasks[0].start;
+                for (var i = 0; i < ret.tasks.length; i++) {
+                  ret.tasks[i].start = ret.tasks[i].start + offset;
+                }
+                return ret;
+              }
+
+              function upload(uploadedFile) {
+                var fileread = new FileReader();
+
+                fileread.onload = function (e) {
+                  var content = e.target.result;
+                  var intern = JSON.parse(content);
+
+                  ge.loadProject(intern);
+                  ge.checkpoint();
+                };
+
+                fileread.readAsText(uploadedFile);
+              }
+
+              //-------------------------------------------  Get project file as JSON (used for migrate project from gantt to Teamwork) ------------------------------------------------------
+              function loadFromLocalStorage() {
+                var ret;
+                if (localStorage) {
+                  if (localStorage.getObject("teamworkGantDemo")) {
+                    ret = localStorage.getObject("teamworkGantDemo");
+                  }
+                }
+
+                if (!ret || !ret.tasks || ret.tasks.length == 0) {
+                  ret = getDemoProject();
+                }
+                return ret;
+              }
+              
+              function initializeHistoryManagement(taskId) {
+                $.getJSON(contextPath + "/applications/teamwork/task/taskAjaxController.jsp", { CM: "GETGANTTHISTPOINTS", OBJID: taskId }, function (response) {
+
+                  if (response.ok == true && response.historyPoints && response.historyPoints.length > 0) {
+
+                    var histBtn = $("<button>").addClass("button textual icon lreq30 lreqLabel").attr("title", "SHOW_HISTORY").append("<span class=\"teamworkIcon\">&#x60;</span>");
+
+                    histBtn.click(function () {
+                      var el = $(this);
+                      var ganttButtons = $(".ganttButtonBar .buttons");
+
+                      if (!ge.element.is(".historyOn")) {
+                        ge.element.addClass("historyOn");
+                        ganttButtons.find(".requireCanWrite").hide();
+
+                        showSavingMessage();
+                        $.getJSON(contextPath + "/applications/teamwork/task/taskAjaxController.jsp", { CM: "GETGANTTHISTPOINTS", OBJID: ge.tasks[0].id }, function (response) {
+                          jsonResponseHandling(response);
+                          hideSavingMessage();
+                          if (response.ok == true) {
+                            var dh = response.historyPoints;
+                            if (dh && dh.length > 0) {
+                              //si crea il div per lo slider
+                              var sliderDiv = $("<div>").prop("id", "slider").addClass("lreq30 lreqHide").css({ "display": "inline-block", "width": "500px" });
+                              ganttButtons.append(sliderDiv);
+
+                              var minVal = 0;
+                              var maxVal = dh.length - 1;
+
+                              $("#slider").show().mbSlider({
+                                rangeColor: '#2f97c6',
+                                minVal: minVal,
+                                maxVal: maxVal,
+                                startAt: maxVal,
+                                showVal: false,
+                                grid: 1,
+                                formatValue: function (val) {
+                                  return new Date(dh[val]).format();
+                                },
+                                onSlideLoad: function (obj) {
+                                  this.onStop(obj);
+
+                                },
+                                onStart: function (obj) { },
+                                onStop: function (obj) {
+                                  var val = $(obj).mbgetVal();
+                                  showSavingMessage();
+                                  $.getJSON(contextPath + "/applications/teamwork/task/taskAjaxController.jsp", { CM: "GETGANTTHISTORYAT", OBJID: ge.tasks[0].id, millis: dh[val] }, function (response) {
+                                    jsonResponseHandling(response);
+                                    hideSavingMessage();
+                                    if (response.ok) {
+                                      ge.baselines = response.baselines;
+                                      ge.showBaselines = true;
+                                      ge.baselineMillis = dh[val];
+                                      ge.redraw();
+                                    }
+                                  })
+
+                                },
+                                onSlide: function (obj) {
+                                  clearTimeout(obj.renderHistory);
+                                  var self = this;
+                                  obj.renderHistory = setTimeout(function () {
+                                    self.onStop(obj);
+                                  }, 200)
+
+                                }
+                              });
+                            }
+                          }
+                        });
+
+                      } else {
+                        $("#slider").remove();
+                        ge.element.removeClass("historyOn");
+                        if (ge.permissions.canWrite)
+                          ganttButtons.find(".requireCanWrite").show();
+
+                        ge.showBaselines = false;
+                        ge.baselineMillis = undefined;
+                        ge.redraw();
+                      }
+
+                    });
+                    $("#saveGanttButton").before(histBtn);
+                  }
+                })
+              }
+
+              function showBaselineInfo(event, element) {
+                //alert(element.attr("data-label"));
+                $(element).showBalloon(event, $(element).attr("data-label"));
+                ge.splitter.secondBox.one("scroll", function () {
+                  $(element).hideBalloon();
+                })
+              }
+
+            </script>
+
+            <div id="gantEditorTemplates" style="display:none;">
+              <!-- #### 간트차트 헤더 영역 : 프로젝트 명, 일간주간 탭 #### -->
+              <div class="__template__" type="GANTBUTTONS">
+                <!-- 
+                  <div class="ganttButtonBar noprint">
+                    <div class="header_btns-flex">
+                      <ul class="project">
+                        <li>프로젝트 관리</li>
+                        <li class="pj">상암동 다담빌딩 신축 프로젝트<small>(2023-07-02~2023-08-27)</small></li>
+                      </ul>
+                      <div class="buttons">
+                        <div class="btn-tab">
+                          <button onclick="$('#workSpace').trigger('zoomMinus.gantt'); return false;" class="button textual icon day-button">일간</button>
+                          <button onclick="$('#workSpace').trigger('zoomPlus.gantt');return false;" class="button textual icon week-button active">주간</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  -->
+              </div>
+            
+              <!-- #### 간트차트 왼쪽 영역 헤더 #### -->
+              <div class="__template__" type="TASKSEDITHEAD">
+                <!--
+                  <table class="gdfTable" cellspacing="0" cellpadding="0">
+                    <thead>
+                    <tr style="height:55px">
+                      <th class="gdfColHeader gdfResizable" style="width:80px; overflow: visible">
+                        <div class="setting-btn">
+                          <button type="button" class="btn_settings"></button>
+                          <ul class="float-menu">
+                            <li><button type="button" onclick="openModal('modal_project')">설정</button></li>
+                            <li><button type="button" onclick="openModal('modal_project')">추가</button></li>
+                            <li><button type="button">삭제</button></li>
+                          </ul>
+                        </div>
+                      </th>
+                      <th class="gdfColHeader gdfResizable" style="width:300px;"><span class="workNm">업무명</span></th>
+                      <th class="gdfColHeader gdfResizable" style="width:80px;">시작일</th>
+                      <th class="gdfColHeader gdfResizable" style="width:80px;">종료일</th>
+                      <th class="gdfColHeader gdfResizable" style="width:0px; display: none">dur.</th>
+                      <th class="gdfColHeader gdfResizable" style="width:120px;">담당자</th>
+                      <th class="gdfColHeader gdfResizable" style="width:120px;">진행상태</th>
+                      <th class="gdfColHeader gdfResizable" style="width:120px;">비고</th>
+                      <th class="gdfColHeader gdfResizable" style="width:120px;">변경기록</th>
+                    </tr>
+                    </thead>
+                  </table>
+                -->
+              </div>
+            
+              <!-- #### 간트차트 왼쪽 영역 콘텐츠 #### -->
+              <div class="__template__" type="TASKROW">
+                <!--
+                  <tr id="tid_(#=obj.id#)" taskId="(#=obj.id#)" class="taskEditRow (#=obj.isParent()?'isParent':''#) (#=obj.collapsed?'collapsed':''#) level_(#=obj.level#)" level="(#=level#)">
+                    <th class="gdfCell" style="cursor:pointer; overflow: visible">
+                      <div class="setting-btn mini">
+                        <button type="button" class="btn_settings mini"></button>
+                        <ul class="float-menu">
+                          <li><button type="button" onclick="openModal('modal_project')">설정</button></li>
+                          <li><button type="button" onclick="openModal('modal_project')">추가</button></li>
+                          <li><button type="button">삭제</button></li>
+                        </ul>
+                      </div>
+                    </th>
+                    <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10+18#)px;">
+                      <div class="exp-controller" align="center"></div>
+                      <div class="project_input project_(#=obj.level#)">
+                        <input type="text" name="name" value="(#=obj.name#)" placeholder="name">
+                      </div>
+                    </td>
+                    <td class="gdfCell"><input type="text" name="start" value="" class="date"></td>
+                    <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
+                    <td class="gdfCell" style="display: none"><input type="text" name="duration" autocomplete="off" value="(#=obj.duration#)"></td>
+                    <td class="gdfCell requireCanSeeDep" style="display: none"><input type="text" name="depends" autocomplete="off" value="(#=obj.depends#)" (#=obj.hasExternalDep?"readonly":""#)></td>
+                    <td class="gdfCell" style="text-align: center">홍길동</td>
+                    <td class="gdfCell" style="text-align: center"><p class="badge (#=obj.status#)"><span></span></p></td>
+                    <td class="gdfCell" style="text-align: center">(#=obj.description#)</td>
+                    <td class="gdfCell" align="center"><button type="button" class="btn_history">이력</button></td>
+                  </tr>
+                -->
+              </div>
+            
+              <!-- #### 간트차트 왼쪽영역 비어있는 row #### -->
+              <div class="__template__" type="TASKEMPTYROW">
+                <!--
+                  <tr class="taskEditRow emptyRow" >
+                    <th class="gdfCell" align="right"></th>
+                    <td class="gdfCell noClip" align="center"></td>
+                    <td class="gdfCell"></td>
+                    <td class="gdfCell"></td>
+                    <td class="gdfCell"></td>
+                    <td class="gdfCell"></td>
+                    <td class="gdfCell"></td>
+                    <td class="gdfCell"></td>
+                    <td class="gdfCell"></td>
+                    <td class="gdfCell"></td>
+                    <td class="gdfCell requireCanSeeDep"></td>
+                    <td class="gdfCell"></td>
+                  </tr>
+                -->
+              </div>
+            </div>
+
+            <script type="text/javascript">
+              $(function () {
+                $('.btn_settings').click(function () {
+                  $('.float-menu').not($(this).siblings()).slideUp(200)
+                  $(this).siblings().slideToggle(200)
+                })
+
+                $('.btn_history').click(function() {
+                  $('#modal_history').show()
+                })
+
+                window.onclick = function (event) {
+                  if (event.target.closest('.setting-btn') == null) {
+                    $('.float-menu').slideUp(200)
+                  }
+                };
+              })
+
+              function loadI18n() {
+                GanttMaster.messages = {
+                  "CANNOT_WRITE": "No permission to change the following task:",
+                  "CHANGE_OUT_OF_SCOPE": "Project update not possible as you lack rights for updating a parent project.",
+                  "START_IS_MILESTONE": "Start date is a milestone.",
+                  "END_IS_MILESTONE": "End date is a milestone.",
+                  "TASK_HAS_CONSTRAINTS": "Task has constraints.",
+                  "GANTT_ERROR_DEPENDS_ON_OPEN_TASK": "Error: there is a dependency on an open task.",
+                  "GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK": "Error: due to a descendant of a closed task.",
+                  "TASK_HAS_EXTERNAL_DEPS": "This task has external dependencies.",
+                  "GANNT_ERROR_LOADING_DATA_TASK_REMOVED": "GANNT_ERROR_LOADING_DATA_TASK_REMOVED",
+                  "CIRCULAR_REFERENCE": "Circular reference.",
+                  "CANNOT_DEPENDS_ON_ANCESTORS": "Cannot depend on ancestors.",
+                  "INVALID_DATE_FORMAT": "The data inserted are invalid for the field format.",
+                  "GANTT_ERROR_LOADING_DATA_TASK_REMOVED": "An error has occurred while loading the data. A task has been trashed.",
+                  "CANNOT_CLOSE_TASK_IF_OPEN_ISSUE": "Cannot close a task with open issues",
+                  "TASK_MOVE_INCONSISTENT_LEVEL": "You cannot exchange tasks of different depth.",
+                  "CANNOT_MOVE_TASK": "CANNOT_MOVE_TASK",
+                  "PLEASE_SAVE_PROJECT": "PLEASE_SAVE_PROJECT",
+                  "GANTT_SEMESTER": "Semester",
+                  "GANTT_SEMESTER_SHORT": "s.",
+                  "GANTT_QUARTER": "Quarter",
+                  "GANTT_QUARTER_SHORT": "q.",
+                  "GANTT_WEEK": "Week",
+                  "GANTT_WEEK_SHORT": "w."
+                };
+              }
+            </script>
+          </div>
+        </div>
+      </div>
+      <!-- 프로젝트 설정 모달 시작 -->
+      <div id="modal_project" class="modal modal-project">
+        <div class="modal__inner">
+          <div class="modal__header">
+            <h2>상암동 다담빌딩 신축 프로젝트</h2>
+          </div>
+          <div class="modal__content">
+            <form action="" class="form_project">
+              <legend>프로젝트 등록/수정폼</legend>
+              <fieldset>
+                <div class="task-input">
+                  <label for="name">업무명</label>
+                  <input type="text" name="name" id="name" autocomplete='off' value="" placeholder="업무명을 입력해 주세요">
+                </div>
+                <div class="task-flex">
+                  <div class="task-input">
+                    <label for="start">시작일</label>
+                    <div class="custom-datepicker">
+                      <input type="text" id="start" class="datepicker" value="" readonly placeholder="년-월-일">
+                    </div>
+                  </div>
+                  <div class="task-input">
+                    <label for="end">종료일</label>
+                    <div class="custom-datepicker">
+                      <input type="text" id="end" class="datepicker" value="" readonly placeholder="년-월-일">
+                    </div>
+                  </div>
+                </div>
+                <div class="task-flex">
+                  <div class="task-input">
+                    <label for="assign">담당자</label>
+                    <select id="assign" name="assign" class="custom-select select-primary w100p">
+                      <option>홍길동</option>
+                      <option>홍길동</option>
+                      <option>홍길동</option>
+                      <option>홍길동</option>
+                    </select>
+                  </div>
+                  <div class="task-input">
+                    <label for="status">진행상태</label>
+                    <select id="status" name="status" class="custom-select select-primary w100p" status="(#=obj.status#)"  onchange="$(this).attr('STATUS',$(this).val());">
+                      <option value="STATUS_ACTIVE" status="STATUS_ACTIVE" class="STATUS_ACTIVE">진행</option>
+                      <option value="STATUS_WAITING" status="STATUS_WAITING"  class="STATUS_WAITING">대기</option>
+                      <option value="STATUS_SUSPENDED" status="STATUS_SUSPENDED" class="STATUS_SUSPENDED">보류</option>
+                      <option value="STATUS_DONE" status="STATUS_DONE"  class="STATUS_DONE">완료</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="task-input flex-start">
+                  <label for="description">비고</label>
+                  <textarea placeholder="내용을 입력해 주세요"></textarea>
+                </div>
+              </fieldset>
+            </form>
+          </div>
+          <div class="btn-area right mt30">
+            <button class="btn-w160 btn_white mr10" onclick="closeModal('modal_project')">닫기</button>
+            <button class="btn-w160 btn_confirm">수정</button>
+          </div>
+        </div>
+      </div>
+      <!-- 프로젝트 설정 모달 끝 -->
+      <!-- 변경이력 모달 시작 -->
+      <div id="modal_history" class="modal modal-history">
+        <div class="modal__inner">
+          <div class="modal__header">
+            <!-- STATUS_ACTIVE -->
+            <!-- STATUS_WAITING -->
+            <!-- STATUS_DONE -->
+            <!-- STATUS_SUSPENDED -->
+            <h2>변경기록<span class="STATUS_ACTIVE">폐기물처리필증</span></h2>
+          </div>
+          <div class="modal__content">
+            <ul class="history__tab">
+              <li class="tabs__link on" data-tab="tab1">업무명</li>
+              <li class="tabs__link" data-tab="tab2">시작일</li>
+              <li class="tabs__link" data-tab="tab3">종료일</li>
+              <li class="tabs__link" data-tab="tab4">진행상태</li>
+              <li class="tabs__link" data-tab="tab5">담당자</li>
+              <li class="tabs__link" data-tab="tab6">비고</li>
+            </ul>
+            <div id="tab1" class="history-tab__content on">
+              <div class="history-table">
+                <table>
+                  <colgroup>
+                    <col style="width: 50%">
+                    <col style="width: 20%">
+                    <col style="width: 30%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>변경내역</th>
+                      <th>변경자 이름</th>
+                      <th>변경일시</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>폐기물처리필증 종료일 변경 (2023-07-10 -> 2023-07-16)</td>
+                      <td>홍길동</td>
+                      <td>2023-07-07 15:13:00</td>
+                    </tr>
+                    <tr>
+                      <td>폐기물처리필증 종료일 변경 (2023-07-10 -> 2023-07-16)</td>
+                      <td>홍길동</td>
+                      <td>2023-07-07 15:13:00</td>
+                    </tr>
+                    <tr>
+                      <td>폐기물처리필증 종료일 변경 (2023-07-10 -> 2023-07-16)</td>
+                      <td>홍길동</td>
+                      <td>2023-07-07 15:13:00</td>
+                    </tr>
+                    <tr>
+                      <td>폐기물처리필증 종료일 변경 (2023-07-10 -> 2023-07-16)</td>
+                      <td>홍길동</td>
+                      <td>2023-07-07 15:13:00</td>
+                    </tr>
+                    <tr>
+                      <td>폐기물처리필증 종료일 변경 (2023-07-10 -> 2023-07-16)</td>
+                      <td>홍길동</td>
+                      <td>2023-07-07 15:13:00</td>
+                    </tr>
+                    <tr>
+                      <td>폐기물처리필증 종료일 변경 (2023-07-10 -> 2023-07-16)</td>
+                      <td>홍길동</td>
+                      <td>2023-07-07 15:13:00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination small mt20">
+                <ul>
+                  <li><a href="javascript:void(0)" class="btn_prev"></a></li>
+                  <li><a href="javascript:void(0)" class="on">1</a></li>
+                  <li><a href="javascript:void(0)">2</a></li>
+                  <li><a href="javascript:void(0)">3</a></li>
+                  <li><a href="javascript:void(0)">4</a></li>
+                  <li><a href="javascript:void(0)">5</a></li>
+                  <li><a href="javascript:void(0)">6</a></li>
+                  <li><a href="javascript:void(0)">7</a></li>
+                  <li><a href="javascript:void(0)">8</a></li>
+                  <li><a href="javascript:void(0)">9</a></li>
+                  <li><a href="javascript:void(0)">10</a></li>
+                  <li><a href="javascript:void(0)" class="btn_next"></a></li>
+                </ul>
+              </div>
+            </div>
+            <div id="tab2" class="history-tab__content">
+              <div class="history-table">
+                <table>
+                  <colgroup>
+                    <col style="width: 50%">
+                    <col style="width: 20%">
+                    <col style="width: 30%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>변경내역</th>
+                      <th>변경자 이름</th>
+                      <th>변경일시</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>폐기물처리필증 종료일 변경 (2023-07-10 -> 2023-07-16)</td>
+                      <td>홍길동</td>
+                      <td>2023-07-07 15:13:00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination small mt20">
+                <ul>
+                  <li><a href="javascript:void(0)" class="btn_prev"></a></li>
+                  <li><a href="javascript:void(0)" class="on">1</a></li>
+                  <li><a href="javascript:void(0)">2</a></li>
+                  <li><a href="javascript:void(0)">3</a></li>
+                  <li><a href="javascript:void(0)">4</a></li>
+                  <li><a href="javascript:void(0)">5</a></li>
+                  <li><a href="javascript:void(0)">6</a></li>
+                  <li><a href="javascript:void(0)">7</a></li>
+                  <li><a href="javascript:void(0)">8</a></li>
+                  <li><a href="javascript:void(0)">9</a></li>
+                  <li><a href="javascript:void(0)">10</a></li>
+                  <li><a href="javascript:void(0)" class="btn_next"></a></li>
+                </ul>
+              </div>
+            </div>
+            <div id="tab3" class="history-tab__content">
+              <div class="history-table">
+                <table>
+                  <colgroup>
+                    <col style="width: 50%">
+                    <col style="width: 20%">
+                    <col style="width: 30%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>변경내역</th>
+                      <th>변경자 이름</th>
+                      <th>변경일시</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>폐기물처리필증 종료일 변경 (2023-07-10 -> 2023-07-16)</td>
+                      <td>홍길동</td>
+                      <td>2023-07-07 15:13:00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination small mt20">
+                <ul>
+                  <li><a href="javascript:void(0)" class="btn_prev"></a></li>
+                  <li><a href="javascript:void(0)" class="on">1</a></li>
+                  <li><a href="javascript:void(0)">2</a></li>
+                  <li><a href="javascript:void(0)">3</a></li>
+                  <li><a href="javascript:void(0)">4</a></li>
+                  <li><a href="javascript:void(0)">5</a></li>
+                  <li><a href="javascript:void(0)">6</a></li>
+                  <li><a href="javascript:void(0)">7</a></li>
+                  <li><a href="javascript:void(0)">8</a></li>
+                  <li><a href="javascript:void(0)">9</a></li>
+                  <li><a href="javascript:void(0)">10</a></li>
+                  <li><a href="javascript:void(0)" class="btn_next"></a></li>
+                </ul>
+              </div>
+            </div>
+            <div id="tab4" class="history-tab__content">
+              <div class="history-table">
+                <table>
+                  <colgroup>
+                    <col style="width: 50%">
+                    <col style="width: 20%">
+                    <col style="width: 30%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>변경내역</th>
+                      <th>변경자 이름</th>
+                      <th>변경일시</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>폐기물처리필증 종료일 변경 (2023-07-10 -> 2023-07-16)</td>
+                      <td>홍길동</td>
+                      <td>2023-07-07 15:13:00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination small mt20">
+                <ul>
+                  <li><a href="javascript:void(0)" class="btn_prev"></a></li>
+                  <li><a href="javascript:void(0)" class="on">1</a></li>
+                  <li><a href="javascript:void(0)">2</a></li>
+                  <li><a href="javascript:void(0)">3</a></li>
+                  <li><a href="javascript:void(0)">4</a></li>
+                  <li><a href="javascript:void(0)">5</a></li>
+                  <li><a href="javascript:void(0)">6</a></li>
+                  <li><a href="javascript:void(0)">7</a></li>
+                  <li><a href="javascript:void(0)">8</a></li>
+                  <li><a href="javascript:void(0)">9</a></li>
+                  <li><a href="javascript:void(0)">10</a></li>
+                  <li><a href="javascript:void(0)" class="btn_next"></a></li>
+                </ul>
+              </div>
+            </div>
+            <div id="tab5" class="history-tab__content">
+              <div class="history-table">
+                <table>
+                  <colgroup>
+                    <col style="width: 50%">
+                    <col style="width: 20%">
+                    <col style="width: 30%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>변경내역</th>
+                      <th>변경자 이름</th>
+                      <th>변경일시</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>폐기물처리필증 종료일 변경 (2023-07-10 -> 2023-07-16)</td>
+                      <td>홍길동</td>
+                      <td>2023-07-07 15:13:00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination small mt20">
+                <ul>
+                  <li><a href="javascript:void(0)" class="btn_prev"></a></li>
+                  <li><a href="javascript:void(0)" class="on">1</a></li>
+                  <li><a href="javascript:void(0)">2</a></li>
+                  <li><a href="javascript:void(0)">3</a></li>
+                  <li><a href="javascript:void(0)">4</a></li>
+                  <li><a href="javascript:void(0)">5</a></li>
+                  <li><a href="javascript:void(0)">6</a></li>
+                  <li><a href="javascript:void(0)">7</a></li>
+                  <li><a href="javascript:void(0)">8</a></li>
+                  <li><a href="javascript:void(0)">9</a></li>
+                  <li><a href="javascript:void(0)">10</a></li>
+                  <li><a href="javascript:void(0)" class="btn_next"></a></li>
+                </ul>
+              </div>
+            </div>
+            <div id="tab6" class="history-tab__content">
+              <div class="history-table">
+                <table>
+                  <colgroup>
+                    <col style="width: 50%">
+                    <col style="width: 20%">
+                    <col style="width: 30%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>변경내역</th>
+                      <th>변경자 이름</th>
+                      <th>변경일시</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>폐기물처리필증 종료일 변경 (2023-07-10 -> 2023-07-16)</td>
+                      <td>홍길동</td>
+                      <td>2023-07-07 15:13:00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination small mt20">
+                <ul>
+                  <li><a href="javascript:void(0)" class="btn_prev"></a></li>
+                  <li><a href="javascript:void(0)" class="on">1</a></li>
+                  <li><a href="javascript:void(0)">2</a></li>
+                  <li><a href="javascript:void(0)">3</a></li>
+                  <li><a href="javascript:void(0)">4</a></li>
+                  <li><a href="javascript:void(0)">5</a></li>
+                  <li><a href="javascript:void(0)">6</a></li>
+                  <li><a href="javascript:void(0)">7</a></li>
+                  <li><a href="javascript:void(0)">8</a></li>
+                  <li><a href="javascript:void(0)">9</a></li>
+                  <li><a href="javascript:void(0)">10</a></li>
+                  <li><a href="javascript:void(0)" class="btn_next"></a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="modal__btns right">
+            <button type="button" class="btn_white" onclick="closeModal('modal_history')">닫기</button>
+          </div>
+        </div>
+      </div>
+      <!-- 변경이력 모달 끝 -->
+    </main>
+    <footer>
+      <div class="footer__inner">
+        <div class="left">
+          <div class="logo_area">
+            <a href="/index.html" class="logo"></a>
+            <p class="copyright">Copyright ⓒ2023 HDIT, Inc. All rights reserved</p>
+          </div>
+          <div class="company_info">
+            <p>주소 : 12106 경기도 남양주시 순화궁로 249, 601호 (별내파라곤스퀘어)</p>
+            <p>Tel : +82-985-3126</p>
+            <p>대표이사 : 방준희</p>
+            <p>사업자 등록번호 : 210-81-54780</p>
+          </div>
+        </div>
+        <div class="right">
+          <ul class="sns footer">
+            <li><a href="#" class="f_sns_facebook"></a></li>
+            <li><a href="#" class="f_sns_naver"></a></li>
+            <li><a href="#" class="f_sns_kakao"></a></li>
+          </ul>
+          <div class="footer_btns">
+            <a href="#">약관</a>
+            <a href="#">개인정보처리방침</a>
+          </div>
+          <div class="footer-logo_area mobile_show">
+            <p class="copyright">Copyright ⓒ2023 HDIT, Inc. All rights reserved</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+  <script>
+    /* Tab */
+    $("ul.history__tab li.tabs__link").click(function () {
+      var tab_id = $(this).attr("data-tab");
+
+      $("ul.history__tab li.tabs__link").removeClass("on");
+      $(".history-tab__content").removeClass("on");
+
+      $(this).addClass("on");
+      $("#" + tab_id).addClass("on");
+    });
+  </script>
+</body>
+
+</html>
